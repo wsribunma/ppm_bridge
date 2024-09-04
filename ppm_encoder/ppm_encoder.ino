@@ -4,8 +4,8 @@
 #define DEFAULT_CHANNEL_VALUE 1500
 #define OUTPUT_PIN 14 // pin A7 on Arduino Nano ESP32
 #define FAILSAFE 3000 // failsafe timeout in millis
+//#include <mutex>
 
-unsigned int prev_timer;
 
 struct packet_t {
   uint16_t header;
@@ -24,10 +24,12 @@ packet_union_t msg;
 char buf[BUF_SIZE];
 int decode_index = 0;
 
-uint16_t channelValue[PPM_CHANNELS] = {1000, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500};
+volatile uint16_t channelValue[PPM_CHANNELS] = {1000, 1500, 1500, 1500, 1900, 1000, 1500, 1500, 1500, 1500, 1500};
+//std::mutex channel_mutex;
 
 hw_timer_t *timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+int time_last = 0;
 
 enum ppmState_e
 {
@@ -39,96 +41,121 @@ enum ppmState_e
 
 void IRAM_ATTR onPpmTimer()
 {
+  noInterrupts();
 
-    static uint8_t ppmState = PPM_STATE_IDLE;
-    static uint8_t ppmChannel = 0;
-    static uint8_t ppmOutput = HIGH;
-    static int usedFrameLength = 0;
-    uint16_t currentChannelValue;
+  //std::lock_guard<std::mutex> lck(channel_mutex);
+  static uint8_t ppmState = PPM_STATE_IDLE;
+  static uint8_t ppmChannel = 0;
+  static uint8_t ppmOutput = HIGH;
+  static int usedFrameLength = 0;
+  uint16_t currentChannelValue;
 
-    portENTER_CRITICAL(&timerMux);
+  portENTER_CRITICAL(&timerMux);
 
-    if (ppmState == PPM_STATE_IDLE)
-    {
-        ppmState = PPM_STATE_PULSE;
-        ppmChannel = 0;
-        usedFrameLength = 0;
-        ppmOutput = HIGH;
-    }
+  if (ppmState == PPM_STATE_IDLE)
+  {
+      ppmState = PPM_STATE_PULSE;
+      ppmChannel = 0;
+      usedFrameLength = 0;
+      ppmOutput = HIGH;
+  }
 
-    if (ppmState == PPM_STATE_PULSE)
-    {
-        ppmOutput = LOW;
-        usedFrameLength += PPM_PULSE_LENGTH;
-        ppmState = PPM_STATE_FILL;
+  if (ppmState == PPM_STATE_PULSE)
+  {
+      ppmOutput = LOW;
+      usedFrameLength += PPM_PULSE_LENGTH;
+      ppmState = PPM_STATE_FILL;
 
-        timerAlarmWrite(timer, PPM_PULSE_LENGTH, true);
-    }
-    else if (ppmState == PPM_STATE_FILL)
-    {
-        ppmOutput = HIGH;
-        currentChannelValue = channelValue[ppmChannel];
+      timerAlarmWrite(timer, PPM_PULSE_LENGTH, true);
+  }
+  else if (ppmState == PPM_STATE_FILL)
+  {
+      ppmOutput = HIGH;
+      currentChannelValue = channelValue[ppmChannel];
 
-        ppmChannel++;
-        ppmState = PPM_STATE_PULSE;// pulse type when symbol
-        if (ppmChannel >= PPM_CHANNELS)
-        {
-            ppmChannel = 0;
-            timerAlarmWrite(timer, PPM_FRAME_LENGTH - usedFrameLength, true);
-            usedFrameLength = 0;
-        }
-        else
-        {
-            usedFrameLength += currentChannelValue - PPM_PULSE_LENGTH;
-            timerAlarmWrite(timer, currentChannelValue - PPM_PULSE_LENGTH, true);
-        }
-    }
-    portEXIT_CRITICAL(&timerMux);
-    digitalWrite(OUTPUT_PIN, ppmOutput);
+      ppmChannel++;
+      ppmState = PPM_STATE_PULSE;// pulse type when symbol
+      if (ppmChannel >= PPM_CHANNELS)
+      {
+          ppmChannel = 0;
+          timerAlarmWrite(timer, PPM_FRAME_LENGTH - usedFrameLength, true);
+          usedFrameLength = 0;
+      }
+      else
+      {
+          usedFrameLength += currentChannelValue - PPM_PULSE_LENGTH;
+          timerAlarmWrite(timer, currentChannelValue - PPM_PULSE_LENGTH, true);
+      }
+  }
+  portEXIT_CRITICAL(&timerMux);
+  digitalWrite(OUTPUT_PIN, ppmOutput);
+  interrupts();
 }
 
-
-void setup()
-{
-    //Declare Pin output
-    pinMode(OUTPUT_PIN, OUTPUT);
-
-    //Setup Serial Connection
-    Serial.begin(57600);
-    Serial.setTimeout(100); /////RECHECK THIS default is 1ms
-    memset(msg.bytes, 0, 14);
-
-
+void ppm_enable() {
+  if (timer == NULL) {
+    //Serial.println("ppm enable");
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onPpmTimer, true);
     timerAlarmWrite(timer, 12000, true);
     timerAlarmEnable(timer);
+  }
+}
+
+void ppm_disable() {
+  if (timer != NULL) {
+    //Serial.println("ppm disable");
+    timer = timerBegin(0, 80, true);
+    timerAttachInterrupt(timer, &onPpmTimer, true);
+    timerAlarmWrite(timer, 12000, true);
+    timerAlarmEnable(timer);
+    timer = NULL;
+  }
+}
+
+void setup()
+{
+  //Declare Pin output
+  pinMode(OUTPUT_PIN, OUTPUT);
+
+  //Setup Serial Connection
+  Serial.begin(57600);
+  //Serial.setDebugOutput(true);
+  //Serial.setRxBufferSize(1024);
+  //Serial.setTxTimeoutMs(1000);
+  //Serial.setTimeout(1000); /////RECHECK THIS default is 1ms
+  memset(msg.bytes, 0, 14);
+  ppm_enable();
 }
 
 void loop() {
-  // see how many bytes are available
-  size_t bytes_avail = Serial.available();
+  delay(20);
+  int now = millis();
+  //Serial.println(now);
 
-  // return if no bytes available
-  if (bytes_avail == 0) {
-    Serial.println("Bytes not available...");
-    return;
+  size_t bytes_read = 0;
+  size_t bytes_avail = Serial.available();
+  if (bytes_avail > 0) {
+    bytes_read = Serial.readBytes(buf, bytes_avail);
+  }
+
+  if (now - time_last > 1000) {
+    channelValue[0] = 1000;
+    channelValue[1] = 1500;
+    channelValue[2] = 1500;
+    channelValue[3] = 1500;
+    channelValue[4] = 2000;
   }
 
   // read bytes
-  size_t bytes_to_read = bytes_avail;
-  if (bytes_to_read > BUF_SIZE) {
-      bytes_avail = BUF_SIZE;
-  }
-  size_t bytes_read = Serial.readBytes(buf, bytes_to_read);
-  // Serial.print("bytes read: ");
-  // Serial.println(bytes_read);
-
+  //Serial.print("bytes read: ");
+  //Serial.println(bytes_read);
+  
   // decode message
   for (int i=0;i<bytes_read;i++) {
     uint8_t curr_byte = buf[i];
-    // Serial.print("byte: ");
-    // Serial.println(curr_byte);
+    //Serial.print("byte: ");
+    //Serial.println(curr_byte);
     if (decode_index == 0) { // looking for first byte of header
       if (curr_byte == 255) {
         decode_index = 1;
@@ -158,23 +185,25 @@ void loop() {
       if (sum == msg.packet.cksum) {
         // we have good data, send to servos
         // Serial.print("good");
+        //std::lock_guard<std::mutex> lck(channel_mutex);
         for (int i=0;i<5;i++) {
           channelValue[i] = msg.packet.channels[i];
-          Serial.print(msg.packet.channels[i]);
+          // Serial.print(msg.packet.channels[i]);
 
         }
-        Serial.println();
+        time_last = now;
+        // Serial.println();
     
       } else {
-        Serial.println("checksum failed: ");
-        Serial.println(sum);
+        //Serial.println("checksum failed: ");
+        //Serial.println(sum);
       }
       decode_index = 0;
     } else { // should never get here
-      Serial.println("should never get here!");
+      //Serial.println("should never get here!");
       decode_index = 0;
     }
-    // Serial.print("decode index: ");
-    // Serial.println(decode_index);
+    //Serial.print("decode index: ");
+    //Serial.println(decode_index);
   }
 }

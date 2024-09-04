@@ -51,7 +51,7 @@ def generate_launch_description():
         arguments=['--ros-args', '--log-level', LaunchConfiguration('log_level')],
         parameters=[
             {'use_sim_time': LaunchConfiguration('sim')},
-            {'coalesce_interval_ms': 50},
+            {'coalesce_interval_ms': 1},
             {'autorepeat_rate': 20.0},
             {'deadzone': 0.02},
             ],
@@ -59,7 +59,7 @@ def generate_launch_description():
     )
 
     joy_throttle = ExecuteProcess(
-        cmd=['ros2', 'run', 'topic_tools', 'throttle', 'messages', 'joy', '5'],
+        cmd=['ros2', 'run', 'topic_tools', 'throttle', 'messages', 'joy', '20'],
         name='joy_throttle',
         output='log',
         on_exit=Shutdown()
