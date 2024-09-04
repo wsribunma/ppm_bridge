@@ -1,4 +1,5 @@
 #include <memory>
+#include <algorithm>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -22,7 +23,7 @@ class MinimalSubscriber : public rclcpp::Node
     : Node("minimal_subscriber"), m_io(), m_port(m_io)
     {
       m_subscription = this->create_subscription<sensor_msgs::msg::Joy>(
-      "joy", 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));
+      "joy_throttle", 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));
 
       auto get_status =
       [this]() -> void
@@ -35,7 +36,7 @@ class MinimalSubscriber : public rclcpp::Node
       // m_timer  = this->create_wall_timer(1s, get_status);
 
       m_port.open("/dev/ttyACM0");
-      m_port.set_option(asio::serial_port_base::baud_rate(115200));
+      m_port.set_option(asio::serial_port_base::baud_rate(57600));
       for (int i = 0; i<5; i++){
         m_servo_data.data[i] = 1000;
       }      
@@ -46,18 +47,32 @@ class MinimalSubscriber : public rclcpp::Node
     //public member attributes
 
   private:
-    // Private member methods
+    // Private member methodsjoy
     void topic_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
-      RCLCPP_INFO(this->get_logger(), "joy: %f %f %f %f",
-        msg->axes[0], msg->axes[1], msg->axes[2], msg->axes[3]);
-      m_servo_data.data[0] = 1000*msg->axes[1] + 1000;
-      m_servo_data.data[1] = 500*msg->axes[3] + 1500;
-      m_servo_data.data[2] = 500*msg->axes[4] + 1500;
-      m_servo_data.data[3] = 500*msg->axes[0] + 1500;
-      m_servo_data.data[4] = 500*msg->axes[2] + 1500;
-      m_servo_data.bytes[10] = '\n';
-      m_port.write_some(asio::buffer(m_servo_data.bytes, 11));
+      RCLCPP_INFO(this->get_logger(), "joy: %f %f %f %f %f",
+        msg->axes[0], msg->axes[1], msg->axes[2], msg->axes[3], msg->axes[4]);
+      // m_servo_data.data[0] = 1000*msg->axes[1] + 1000;
+      // m_servo_data.data[1] = 500*msg->axes[3] + 1500;
+      // m_servo_data.data[2] = 500*msg->axes[4] + 1500;
+      // m_servo_data.data[3] = 500*msg->axes[0] + 1500;
+      // m_servo_data.data[4] = 200*msg->axes[2] + 1800;
+      m_servo_data.data[0] = std::clamp(1000 * msg->axes[1] + 1000, 1000.0f, 2000.0f);
+      m_servo_data.data[1] = std::clamp(500 * msg->axes[3] + 1500, 1000.0f, 2000.0f);
+      m_servo_data.data[2] = std::clamp(500 * msg->axes[4] + 1500, 1000.0f, 2000.0f);
+      m_servo_data.data[3] = std::clamp(500 * msg->axes[0] + 1500, 1000.0f, 2000.0f);
+      m_servo_data.data[4] = std::clamp(1000 * msg->axes[2] + 2000, 1000.0f, 2000.0f);
+      uint16_t cksum = 0;
+      for (int i=0;i<5;i++) {
+        cksum += m_servo_data.data[i];
+      }
+      char packet[14];
+      uint16_t header = 65535;
+      memcpy(packet, &header, 2);
+      memcpy(&packet[2], m_servo_data.bytes, 10);
+      memcpy(&packet[12], &cksum, 2);
+      m_port.write_some(asio::buffer(packet, 14));
+      RCLCPP_INFO(this->get_logger(), "Sent to serial: [%u, %u, %u, %u, %u]", m_servo_data.data[0], m_servo_data.data[1], m_servo_data.data[2], m_servo_data.data[3], m_servo_data.data[4]);
     }
     
     // Member attributes
