@@ -22,6 +22,12 @@ class MinimalSubscriber : public rclcpp::Node
     MinimalSubscriber()
     : Node("minimal_subscriber"), m_io(), m_port(m_io)
     {
+      // Declare Joy Controller
+      this->declare_parameter("controller_id", rclcpp::PARAMETER_STRING);
+      rclcpp::Parameter controller_param = this->get_parameter("controller_id");
+      m_controller_id_param_str = controller_param.as_string();
+
+
       m_subscription = this->create_subscription<sensor_msgs::msg::Joy>(
       "joy_throttle", 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));
       m_pub_status = this->create_publisher<std_msgs::msg::String>("status", 10);
@@ -51,6 +57,7 @@ class MinimalSubscriber : public rclcpp::Node
     // Private member methodsjoy
     void topic_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
+      RCLCPP_INFO(this->get_logger(), "controller id: %s", m_controller_id_param_str.c_str());
       //RCLCPP_INFO(this->get_logger(), "joy: %f %f %f %f %f",
       //  msg->axes[0], msg->axes[1], msg->axes[2], msg->axes[3], msg->axes[4]);
       // m_servo_data.data[0] = 1000*msg->axes[1] + 1000;
@@ -58,11 +65,22 @@ class MinimalSubscriber : public rclcpp::Node
       // m_servo_data.data[2] = 500*msg->axes[4] + 1500;
       // m_servo_data.data[3] = 500*msg->axes[0] + 1500;
       // m_servo_data.data[4] = 200*msg->axes[2] + 1800;
-      m_servo_data.data[0] = std::clamp(1000 * msg->axes[1] + 1000, 1000.0f, 2000.0f);
-      m_servo_data.data[1] = std::clamp(500 * msg->axes[3] + 1500, 1000.0f, 2000.0f);
-      m_servo_data.data[2] = std::clamp(500 * msg->axes[4] + 1500, 1000.0f, 2000.0f);
-      m_servo_data.data[3] = std::clamp(500 * msg->axes[0] + 1500, 1000.0f, 2000.0f);
-      m_servo_data.data[4] = std::clamp(1000 * msg->axes[2] + 2000, 1000.0f, 2000.0f);
+      if (m_controller_id_param_str == "taranis"){
+
+        m_servo_data.data[0] = std::clamp(-1000 * msg->axes[0] + 1000, 1000.0f, 2000.0f);
+        m_servo_data.data[1] = std::clamp(500 * msg->axes[1] + 1500, 1000.0f, 2000.0f);
+        m_servo_data.data[2] = std::clamp(500 * msg->axes[2] + 1500, 1000.0f, 2000.0f);
+        m_servo_data.data[3] = std::clamp(500 * msg->axes[3] + 1500, 1000.0f, 2000.0f);
+        m_servo_data.data[4] = std::clamp(1000 * msg->axes[4] + 2000, 1000.0f, 2000.0f);
+      }
+      // else, default to f310 logitech
+      else {
+        m_servo_data.data[0] = std::clamp(1000 * msg->axes[1] + 1000, 1000.0f, 2000.0f);
+        m_servo_data.data[1] = std::clamp(500 * msg->axes[3] + 1500, 1000.0f, 2000.0f);
+        m_servo_data.data[2] = std::clamp(500 * msg->axes[4] + 1500, 1000.0f, 2000.0f);
+        m_servo_data.data[3] = std::clamp(500 * msg->axes[0] + 1500, 1000.0f, 2000.0f);
+        m_servo_data.data[4] = std::clamp(1000 * msg->axes[2] + 2000, 1000.0f, 2000.0f);
+      }
       uint16_t cksum = 0;
       for (int i=0;i<5;i++) {
         cksum += m_servo_data.data[i];
@@ -95,6 +113,7 @@ class MinimalSubscriber : public rclcpp::Node
     servo_data_t m_servo_data;
     u_int8_t m_out_buf[2048];
     rclcpp::TimerBase::SharedPtr m_timer;
+    std::string m_controller_id_param_str;
 };
 
 int main(int argc, char * argv[])

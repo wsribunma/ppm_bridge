@@ -31,7 +31,7 @@ ARGUMENTS = [
 
     DeclareLaunchArgument('controller',
         default_value='f310',
-        choices=['f310', 'ps4'],
+        choices=['f310', 'ps4', 'taranis'],
         description='which controller you are using'
     ),
 
@@ -76,6 +76,7 @@ def generate_launch_description():
             {'coalesce_interval_ms': 50},
             {'autorepeat_rate': 20.0},
             {'deadzone': 0.02},
+            {'controller_id' : LaunchConfiguration('controller')}
             ],
         on_exit=Shutdown()
     )
