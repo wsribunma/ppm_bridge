@@ -30,7 +30,7 @@ ARGUMENTS = [
     ),
 
     DeclareLaunchArgument('controller',
-        default_value='f310',
+        default_value='taranis',
         choices=['f310', 'ps4', 'taranis'],
         description='which controller you are using'
     ),
@@ -61,6 +61,13 @@ def generate_launch_description():
     joy_throttle = ExecuteProcess(
         cmd=['ros2', 'run', 'topic_tools', 'throttle', 'messages', 'joy', '20'],
         name='joy_throttle',
+        output='log',
+        on_exit=Shutdown()
+    )
+
+    auto_joy_throttle = ExecuteProcess(
+        cmd=['ros2', 'run', 'topic_tools', 'throttle', 'messages', 'auto_joy', '20'],
+        name='auto_joy_throttle',
         output='log',
         on_exit=Shutdown()
     )
@@ -98,5 +105,6 @@ def generate_launch_description():
         joy,
         bridge,
         joy_throttle,
+        auto_joy_throttle,
         rviz_node,
     ])
