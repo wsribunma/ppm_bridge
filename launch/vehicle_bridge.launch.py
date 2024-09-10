@@ -47,7 +47,7 @@ ARGUMENTS = [
     ),
 
     DeclareLaunchArgument(
-        'vehicle_id',
+        'vehicle',
         default_value= ['nv1'],
         choices=['nv1','nv2','nv3','nv4','nv5'],
         description='vehicle id for namespace use'
@@ -127,7 +127,8 @@ def generate_launch_description():
             {'coalesce_interval_ms': 50},
             {'autorepeat_rate': 20.0},
             {'deadzone': 0.02},
-            {'controller_id' : LaunchConfiguration('controller')}
+            {'controller_id' : LaunchConfiguration('controller')},
+            {'vehicle_id': LaunchConfiguration('vehicle')}
             ],
         on_exit=Shutdown()
     )
@@ -155,7 +156,7 @@ def generate_launch_description():
 
     vehicle_1 = GroupAction(
         actions=[
-            PushROSNamespace(LaunchConfiguration('vehicle_id')),
+            PushROSNamespace(LaunchConfiguration('vehicle')),
             vehicle_description
         ]
         )

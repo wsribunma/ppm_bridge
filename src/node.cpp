@@ -24,8 +24,14 @@ class MinimalSubscriber : public rclcpp::Node
     {
       // Declare Joy Controller
       this->declare_parameter("controller_id", rclcpp::PARAMETER_STRING);
+      this->declare_parameter("vehicle_id", rclcpp::PARAMETER_STRING);
+
       rclcpp::Parameter controller_param = this->get_parameter("controller_id");
+      rclcpp::Parameter controller_param = this->get_parameter("vehicle_id");
+
       m_controller_id_param_str = controller_param.as_string();
+      m_vehicle_id_param_str = controller_param.as_string();
+
 
 
       m_subscription = this->create_subscription<sensor_msgs::msg::Joy>(
