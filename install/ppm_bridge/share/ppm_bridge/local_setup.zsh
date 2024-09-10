@@ -1,0 +1,1 @@
+/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge/ament_cmake_environment_hooks/local_setup.zsh

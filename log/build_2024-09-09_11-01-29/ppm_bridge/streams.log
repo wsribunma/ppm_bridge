@@ -1,0 +1,73 @@
+[0.007s] Invoking command in '/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/wsribunm/nvp_ros2_ws/install/ros2ppm_bridge:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/wsribunm/nvp_ros2_ws/src/ppm_bridge -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge
+[0.075s] -- The C compiler identification is GNU 13.2.0
+[0.117s] -- The CXX compiler identification is GNU 13.2.0
+[0.132s] -- Detecting C compiler ABI info
+[0.200s] -- Detecting C compiler ABI info - done
+[0.205s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.206s] -- Detecting C compile features
+[0.206s] -- Detecting C compile features - done
+[0.213s] -- Detecting CXX compiler ABI info
+[0.289s] -- Detecting CXX compiler ABI info - done
+[0.295s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.295s] -- Detecting CXX compile features
+[0.296s] -- Detecting CXX compile features - done
+[0.302s] -- Found ament_cmake: 2.5.2 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.401s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[0.448s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.487s] -- Found rclcpp: 28.1.3 (/opt/ros/jazzy/share/rclcpp/cmake)
+[0.526s] -- Found rosidl_generator_c: 4.6.3 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[0.539s] -- Found rosidl_generator_cpp: 4.6.3 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[0.555s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.571s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.638s] -- Found rmw_implementation_cmake: 7.3.1 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+[0.642s] -- Found rmw_cyclonedds_cpp: 2.2.2 (/opt/ros/jazzy/share/rmw_cyclonedds_cpp/cmake)
+[0.669s] -- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+[0.719s] -- Found std_msgs: 5.3.5 (/opt/ros/jazzy/share/std_msgs/cmake)
+[0.730s] -- Found sensor_msgs: 5.3.5 (/opt/ros/jazzy/share/sensor_msgs/cmake)
+[0.770s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0") found components: system 
+[0.774s] -- Found ament_lint_auto: 0.17.1 (/opt/ros/jazzy/share/ament_lint_auto/cmake)
+[0.853s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[0.853s] -- Configured cppcheck include dirs: 
+[0.853s] -- Configured cppcheck exclude dirs and/or files: 
+[0.855s] -- Added test 'flake8' to check Python code syntax and style conventions
+[0.855s] -- Configured 'flake8' exclude dirs and/or files: 
+[0.856s] -- Added test 'lint_cmake' to check CMake code style
+[0.858s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[0.862s] -- Added test 'uncrustify' to check C / C++ code style
+[0.862s] -- Configured uncrustify additional arguments: 
+[0.864s] -- Added test 'xmllint' to check XML markup files
+[0.866s] -- Configuring done (0.9s)
+[0.873s] -- Generating done (0.0s)
+[0.874s] -- Build files have been written to: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge
+[0.880s] Invoked command in '/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/wsribunm/nvp_ros2_ws/install/ros2ppm_bridge:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/wsribunm/nvp_ros2_ws/src/ppm_bridge -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge
+[0.881s] Invoking command in '/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/wsribunm/nvp_ros2_ws/install/ros2ppm_bridge:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge -- -j20 -l20
+[0.924s] [ 50%] [32mBuilding CXX object CMakeFiles/node.dir/src/node.cpp.o[0m
+[2.766s] [01m[K/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/src/node.cpp:[m[K In constructor ‘[01m[KMinimalSubscriber::[01;32m[KMinimalSubscriber[m[K()[m[K’:
+[2.766s] [01m[K/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/src/node.cpp:41:12:[m[K [01;35m[Kwarning: [m[Kvariable ‘[01m[Kget_status[m[K’ set but not used [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-but-set-variable-Wunused-but-set-variable]8;;[m[K]
+[2.766s]    41 |       auto [01;35m[Kget_status[m[K =
+[2.766s]       |            [01;35m[K^~~~~~~~~~[m[K
+[6.559s] [100%] [32m[1mLinking CXX executable node[0m
+[6.731s] [100%] Built target node
+[6.741s] Invoked command in '/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/wsribunm/nvp_ros2_ws/install/ros2ppm_bridge:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge -- -j20 -l20
+[6.767s] Invoking command in '/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/wsribunm/nvp_ros2_ws/install/ros2ppm_bridge:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge
+[6.772s] -- Install configuration: ""
+[6.772s] -- Execute custom install script
+[6.772s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/lib/ppm_bridge/node
+[6.780s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/config/bridge.rviz
+[6.787s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/launch/bridge.launch.py
+[6.793s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ament_index/resource_index/package_run_dependencies/ppm_bridge
+[6.801s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ament_index/resource_index/parent_prefix_path/ppm_bridge
+[6.807s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/environment/ament_prefix_path.sh
+[6.813s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/environment/ament_prefix_path.dsv
+[6.819s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/environment/path.sh
+[6.825s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/environment/path.dsv
+[6.832s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/local_setup.bash
+[6.838s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/local_setup.sh
+[6.844s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/local_setup.zsh
+[6.850s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/local_setup.dsv
+[6.856s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/package.dsv
+[6.871s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ament_index/resource_index/packages/ppm_bridge
+[6.878s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/cmake/ppm_bridgeConfig.cmake
+[6.884s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/cmake/ppm_bridgeConfig-version.cmake
+[6.892s] -- Symlinking: /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/install/ppm_bridge/share/ppm_bridge/package.xml
+[6.899s] Invoked command in '/home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/wsribunm/nvp_ros2_ws/install/ros2ppm_bridge:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/wsribunm/nvp_ros2_ws/src/ppm_bridge/build/ppm_bridge

@@ -1,0 +1,4 @@
+source;share/ppm_bridge/local_setup.bash
+source;share/ppm_bridge/local_setup.dsv
+source;share/ppm_bridge/local_setup.sh
+source;share/ppm_bridge/local_setup.zsh
