@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!--
+This launch file is intended to initiate ppm bridge for a 3-channel fixed-wing UAV, UMX Night Vapor
+(https://www.horizonhobby.com/product/umx-night-vapor-rtf-with-as3x-and-safe-select/EFLU1300.html) 
+-->
+<launch>
+  <!-- Launch arguments -->
+  <arg name="sim" default="false" description="use with simulation"/>
+  <arg name="rviz" default="false" description="use rviz for gui"/>
+  <arg name="joy" default="true" description="use joystick"/>
+  <arg name="controller" default="taranis" description="which controller you are using (f310, ps4, taranis)"/>
+  <arg name="log_level" default="warn" description="Logging level"/>
+  <arg name="vehicle" default="nv1" description="vehicle id for namespace use (nv1, nv2, nv3, nv4, nv5)"/>
+
+  <!-- Group all nodes under vehicle namespace -->
+  <group>
+    <push_ros_namespace namespace="$(var vehicle)"/>
+
+    <!-- Joy node -->
+    <node pkg="joy" exec="joy_node" output="log" if="$(var joy)" on_exit="shutdown">
+      <param name="use_sim_time" value="$(var sim)"/>
+      <param name="coalesce_interval_ms" value="1"/>
+      <param name="autorepeat_rate" value="20.0"/>
+      <param name="deadzone" value="0.02"/>
+    </node>
+
+    <!-- Joy throttle container -->
+    <node pkg="rclcpp_components" exec="component_container" name="joy_thr" output="both">
+      <composable_node pkg="topic_tools" plugin="topic_tools::ThrottleNode" name="joy_throttle">
+        <param name="throttle_type" value="messages"/>
+        <param name="input_topic" value="joy"/>
+        <param name="msgs_per_sec" value="10.0"/>
+        <extra_arg name="use_intra_process_comms" value="true"/>
+      </composable_node>
+    </node>
+
+    <!-- Auto joy throttle container -->
+    <node pkg="rclcpp_components" exec="component_container" name="auto_joy_thr" output="both">
+      <composable_node pkg="topic_tools" plugin="topic_tools::ThrottleNode" name="throttle">
+        <param name="throttle_type" value="messages"/>
+        <param name="input_topic" value="auto_joy"/>
+        <param name="msgs_per_sec" value="10.0"/>
+        <extra_arg name="use_intra_process_comms" value="true"/>
+      </composable_node>
+    </node>
+
+    <!-- PPM Bridge node (3-channel) -->
+    <node pkg="ppm_bridge" exec="ppm_bridge_node" name="bridge" output="log" on_exit="shutdown">
+      <param name="use_sim_time" value="$(var sim)"/>
+      <param name="coalesce_interval_ms" value="50"/>
+      <param name="autorepeat_rate" value="20.0"/>
+      <param name="deadzone" value="0.02"/>
+      <param name="controller_id" value="$(var controller)"/>
+      <param name="vehicle_id" value="$(var vehicle)"/>
+      <!-- Channel map: output[i] = servo_data[channel_map[i]]
+           Internal servo_data indices: [0=Throttle, 1=Aileron, 2=Elevator, 3=Rudder, 4=Mode]
+           UMX Night Vapor uses [0,1,2,3,4] = TAERM order (Throttle, Aileron, Elevator, Rudder, Mode) -->
+      <param name="channel_map" value="[0, 1, 2, 3, 4]"/>
+    </node>
+
+    <!-- RViz2 -->
+    <node pkg="rviz2" exec="rviz2" output="screen" if="$(var rviz)" on_exit="shutdown">
+      <arg name="-d" value="$(find-pkg-share electrode)/config/bridge.rviz"/>
+      <param name="use_sim_time" value="$(var sim)"/>
+    </node>
+
+  </group>
+
+</launch>

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+This is demo of ppm bridge without namespace and is not extended towards any particular vehicle.
+-->
+<launch>
+  <!-- Launch arguments -->
+  <arg name="sim" default="false" description="use with simulation"/>
+  <arg name="rviz" default="false" description="use rviz for gui"/>
+  <arg name="joy" default="true" description="use joystick"/>
+  <arg name="controller" default="taranis" description="which controller you are using (f310, ps4, taranis)"/>
+  <arg name="log_level" default="warn" description="Logging level"/>
+
+  <!-- Joy node -->
+  <node pkg="joy" exec="joy_node" output="log" if="$(var joy)" on_exit="shutdown">
+    <param name="use_sim_time" value="$(var sim)"/>
+    <param name="coalesce_interval_ms" value="1"/>
+    <param name="autorepeat_rate" value="20.0"/>
+    <param name="deadzone" value="0.02"/>
+  </node>
+
+  <!-- Joy throttle -->
+  <executable cmd="ros2 run topic_tools throttle messages joy 20" 
+              name="joy_throttle" 
+              output="log" 
+              on_exit="shutdown"/>
+
+  <!-- Auto joy throttle -->
+  <executable cmd="ros2 run topic_tools throttle messages auto_joy 20" 
+              name="auto_joy_throttle" 
+              output="log" 
+              on_exit="shutdown"/>
+
+  <!-- PPM Bridge node -->
+  <node pkg="ppm_bridge" exec="ppm_bridge_node" output="log" on_exit="shutdown">
+    <param name="use_sim_time" value="$(var sim)"/>
+    <param name="coalesce_interval_ms" value="50"/>
+    <param name="autorepeat_rate" value="20.0"/>
+    <param name="deadzone" value="0.02"/>
+    <param name="controller_id" value="$(var controller)"/>
+    <!-- Channel map: output[i] = servo_data[channel_map[i]]
+         Internal servo_data indices: [0=Throttle, 1=Aileron, 2=Elevator, 3=Rudder, 4=Mode]
+         Default [0,1,2,3,4] = TAERM order (Throttle, Aileron, Elevator, Rudder, Mode) -->
+    <param name="channel_map" value="[0, 1, 2, 3, 4]"/>
+  </node>
+
+  <!-- RViz2 -->
+  <node pkg="rviz2" exec="rviz2" output="screen" if="$(var rviz)" on_exit="shutdown">
+    <arg name="-d" value="$(find-pkg-share electrode)/config/bridge.rviz"/>
+    <param name="use_sim_time" value="$(var sim)"/>
+  </node>
+
+</launch>
