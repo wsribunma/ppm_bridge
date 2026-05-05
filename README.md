@@ -75,8 +75,8 @@ The node uses a `channel_map` parameter to reorder outputs for different vehicle
 - `auto_joy_throttle` (`sensor_msgs/msg/Joy`) - Autonomous control input (throttled to 20 Hz)
 
 **Published:**
-- `status` (`std_msgs/msg/String`) - Human-readable channel values
-- `joy_serial_status` (`std_msgs/msg/UInt16MultiArray`) - Channel values in configured order (1000-2000 μs)
+- `status` (`std_msgs/msg/String`) - Human-readable channel values sent to serial
+- `joy_serial_status` (`std_msgs/msg/UInt16MultiArray`) - Channel values reordered by `channel_map` (1000–2000 μs). With the AETRM map `[1, 2, 0, 3, 4]` the array is `[Aileron, Elevator, Throttle, Rudder, Mode]`.
 
 ## Parameters
 
@@ -85,14 +85,16 @@ The node uses a `channel_map` parameter to reorder outputs for different vehicle
 
 ## Joy Message → PPM Mapping
 
-Internal servo_data is always stored as [Throttle, Aileron, Elevator, Rudder, Mode]:
+Internal servo_data is stored as [Aileron, Elevator, Throttle, Rudder, Mode]:
 
-| Index | Channel   | Joy value → PPM (μs)                    | Notes                                |
-|------:|-----------|-----------------------------------------|--------------------------------------|
-| 0     | Throttle  | `0.0 → 1000`, `1.0 → 2000`              | `0.0` = idle, `1.0` = full throttle  |
-| 1     | Aileron   | `-1.0 → 1000`, `0.0 → 1500`, `1.0 → 2000` | `+` = left, `-` = right            |
-| 2     | Elevator  | `-1.0 → 2000`, `0.0 → 1500`, `1.0 → 1000` | `+` = pitch down, `-` = pitch up   |
-| 3     | Rudder    | `-1.0 → 1000`, `0.0 → 1500`, `1.0 → 2000` | `+` = yaw left, `-` = yaw right    |
-| 4     | Mode      | `-1.0 → 1000`, `1.0 → 2000`             | `-1.0` = manual, `1.0` = stabilized  |
+| Index | Channel   | Joy value → PPM (μs)                       | Notes                                |
+|------:|-----------|--------------------------------------------|--------------------------------------|
+| 0     | Aileron   | `-1.0 → 1000`, `0.0 → 1500`, `1.0 → 2000` | `+` = left, `-` = right              |
+| 1     | Elevator  | `-1.0 → 2000`, `0.0 → 1500`, `1.0 → 1000` | `-` = pitch down, `+` = pitch up     |
+| 2     | Throttle  | `1.0 → 1000`, `-1.0 → 2000`                | `1.0` = idle, `-1.0` = full throttle  |
+| 3     | Rudder    | `-1.0 → 1000`, `0.0 → 1500`, `1.0 → 2000` | `+` = yaw left, `-` = yaw right      |
+| 4     | Mode      | `-1.0 → 1000`, `1.0 → 2000`               | `-1.0` = manual, `1.0` = stabilized  |
 
 The `channel_map` parameter determines how these are reordered for serial output.
+
+`joy_serial_status` publishes the five channel values after `channel_map` reordering. With the AETRM map `[1, 2, 0, 3, 4]` (Sport Cub S 2), the array index 0 = Aileron, 1 = Elevator, 2 = Throttle, 3 = Rudder, 4 = Mode.

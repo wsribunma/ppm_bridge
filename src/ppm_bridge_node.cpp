@@ -38,7 +38,8 @@ public:
     m_servo_data{},
     a_servo_data{},
     is_auto_mode_(false),
-    toggle_mode_switch_(false)
+    toggle_mode_switch_(false),
+    controller_online_logged_(false)
   {
     // Declare parameters
     this->declare_parameter("controller_id", rclcpp::PARAMETER_STRING);
@@ -85,7 +86,10 @@ public:
 private:
   void topic_callback(const sensor_msgs::msg::Joy::ConstSharedPtr & msg)
   {
-    RCLCPP_INFO(this->get_logger(), "controller id: %s", m_controller_id_param_str.c_str());
+    if (!controller_online_logged_) {
+      RCLCPP_INFO(this->get_logger(), "controller %s online", m_controller_id_param_str.c_str());
+      controller_online_logged_ = true;
+    }
 
     // Validate message has enough axes and buttons
     if (msg->axes.empty()) {
@@ -215,6 +219,7 @@ private:
   // Joy button mode handling for Logitech
   bool is_auto_mode_;
   bool toggle_mode_switch_;
+  bool controller_online_logged_;
 
   uint8_t m_out_buf[2048];
   rclcpp::TimerBase::SharedPtr m_timer;
