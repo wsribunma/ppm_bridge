@@ -25,24 +25,26 @@ This launch file is intended to initiate ppm bridge for a 4-channel fixed-wing U
     </node>
 
     <!-- Joy throttle container -->
-    <node pkg="rclcpp_components" exec="component_container" name="joy_thr" output="both">
+    <node pkg="rclcpp_components" exec="component_container" name="joy_thr" output="both"/>
+    <load_composable_node target="/$(var vehicle)/joy_thr">
       <composable_node pkg="topic_tools" plugin="topic_tools::ThrottleNode" name="joy_throttle">
         <param name="throttle_type" value="messages"/>
         <param name="input_topic" value="joy"/>
         <param name="msgs_per_sec" value="10.0"/>
         <extra_arg name="use_intra_process_comms" value="true"/>
       </composable_node>
-    </node>
+    </load_composable_node>
 
     <!-- Auto joy throttle container -->
-    <node pkg="rclcpp_components" exec="component_container" name="auto_joy_thr" output="both">
+    <node pkg="rclcpp_components" exec="component_container" name="auto_joy_thr" output="both"/>
+    <load_composable_node target="/$(var vehicle)/auto_joy_thr">
       <composable_node pkg="topic_tools" plugin="topic_tools::ThrottleNode" name="throttle">
         <param name="throttle_type" value="messages"/>
         <param name="input_topic" value="auto_joy"/>
         <param name="msgs_per_sec" value="10.0"/>
         <extra_arg name="use_intra_process_comms" value="true"/>
       </composable_node>
-    </node>
+    </load_composable_node>
 
     <!-- PPM Bridge node -->
     <node pkg="ppm_bridge" exec="ppm_bridge_node" name="bridge" output="log" on_exit="shutdown">
@@ -59,10 +61,9 @@ This launch file is intended to initiate ppm bridge for a 4-channel fixed-wing U
     </node>
 
     <!-- RViz2 -->
-    <node pkg="rviz2" exec="rviz2" output="screen" if="$(var rviz)" on_exit="shutdown">
-      <arg name="-d" value="$(find-pkg-share electrode)/config/bridge.rviz"/>
+    <!-- <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share electrode)/config/bridge.rviz" output="screen" if="$(var rviz)" on_exit="shutdown">
       <param name="use_sim_time" value="$(var sim)"/>
-    </node>
+    </node> -->
 
   </group>
 
